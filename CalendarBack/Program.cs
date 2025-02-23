@@ -13,7 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var modelBuilder = new ODataConventionModelBuilder();
-modelBuilder.EntitySet<CalendarEntry>("Calendar");
+var calendar = modelBuilder.EntitySet<CalendarEntry>("Calendar");
+calendar.EntityType.HasKey(e => e.Id);
 
 builder.Services.AddControllers()
     .AddOData(options => options
@@ -23,7 +24,9 @@ builder.Services.AddControllers()
         .Expand()
         .Count()
         .SetMaxTop(100)
-        .AddRouteComponents("odata", modelBuilder.GetEdmModel()));
+        .AddRouteComponents(
+            routePrefix: "odata",
+            model: modelBuilder.GetEdmModel()));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -36,7 +39,13 @@ builder.Services.AddSwaggerGen(c =>
     });
     
     // Настройка для поддержки OData в Swagger
-    c.DocInclusionPredicate((docName, apiDesc) => true);
+    c.DocInclusionPredicate((docName, apiDesc) => 
+    {
+        if (apiDesc.RelativePath == null) return false;
+        return true;
+    });
+
+    // Используем полное имя типа для схем
     c.CustomSchemaIds(type => type.FullName);
 
     // Подключаем XML документацию
@@ -45,7 +54,12 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 
     // Настройка для разрешения конфликтов в OData
-    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+    c.ResolveConflictingActions(apiDescriptions => 
+    {
+        return apiDescriptions.First(api => 
+            !api.RelativePath.Contains("$") || 
+            api.HttpMethod == "GET");
+    });
     
     // Добавляем поддержку параметров OData
     c.OperationFilter<ODataOperationFilter>();
