@@ -39,6 +39,10 @@ public class CalendarDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone");
 
+            entity.Property(e => e.NotificationSent)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             entity.HasIndex(e => e.ReminderDateTime);
             entity.HasIndex(e => e.Title);
         });

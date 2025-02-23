@@ -10,4 +10,5 @@ public class CalendarEntry
     public DateTime ReminderDateTime { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    public bool NotificationSent { get; set; }
 }

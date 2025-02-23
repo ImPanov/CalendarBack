@@ -33,7 +33,7 @@ public class ReminderService : BackgroundService
                 {
                     var now = DateTime.UtcNow;
                     var dueReminders = await dbContext.CalendarEntries
-                        .Where(e => e.ReminderDateTime <= now)
+                        .Where(e => !e.NotificationSent && e.ReminderDateTime <= now)
                         .ToListAsync(stoppingToken);
 
                     foreach (var reminder in dueReminders)
@@ -44,15 +44,18 @@ public class ReminderService : BackgroundService
                             reminder.Description ?? string.Empty,
                             stoppingToken);
 
+                        reminder.NotificationSent = true;
+                        await dbContext.SaveChangesAsync(stoppingToken);
+
                         _logger.LogInformation(
-                            "Sent notification for reminder {Title} scheduled at {DateTime}",
+                            "Отправлено уведомление для события {Title}, запланированного на {DateTime}",
                             reminder.Title,
                             reminder.ReminderDateTime);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred while processing reminders");
+                    _logger.LogError(ex, "Произошла ошибка при обработке напоминаний");
                 }
             }
 
