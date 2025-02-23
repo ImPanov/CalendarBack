@@ -1,0 +1,55 @@
+@baseUrl = https://localhost:7177
+
+### Получить все записи
+GET {{baseUrl}}/odata/Calendar
+
+### Получить записи с фильтрацией по заголовку
+GET {{baseUrl}}/odata/Calendar?$filter=contains(Title,'Встреча')
+
+### Получить записи на следующую неделю
+GET {{baseUrl}}/odata/Calendar?$filter=ReminderDateTime gt 2025-02-28T00:00:00Z and ReminderDateTime lt 2025-03-11T00:00:00Z
+
+### Получить записи, отсортированные по времени напоминания (по убыванию)
+GET {{baseUrl}}/odata/Calendar?$orderby=ReminderDateTime desc
+
+### Получить только заголовки и время напоминания
+GET {{baseUrl}}/odata/Calendar?$select=Title,ReminderDateTime
+
+### Пагинация: пропустить первые 5 и взять следующие 5
+GET {{baseUrl}}/odata/Calendar?$skip=5&$top=5
+
+### Получить количество записей
+GET {{baseUrl}}/odata/Calendar?$count=true
+
+### Комбинированный запрос: фильтрация + сортировка + выбор полей
+GET {{baseUrl}}/odata/Calendar?$filter=contains(Title,'Встреча')&$orderby=ReminderDateTime&$select=Title,Description,ReminderDateTime
+
+### Получить конкретную запись по ID
+GET {{baseUrl}}/odata/Calendar(1)
+
+### Создать новую запись
+POST {{baseUrl}}/odata/Calendar
+Content-Type: application/json
+
+{
+    "title": "Новая встреча",
+    "description": "Описание новой встречи",
+    "reminderDateTime": "2024-03-01T10:00:00Z"
+}
+
+### Обновить существующую запись
+PUT {{baseUrl}}/odata/Calendar(1)
+Content-Type: application/json
+
+{
+    "id": 1,
+    "title": "Обновленная встреча",
+    "description": "Обновленное описание встречи",
+    "reminderDateTime": "2024-03-02T11:00:00Z"
+}
+
+### Удалить запись
+DELETE {{baseUrl}}/odata/Calendar(1)
+
+### Экспортировать в CSV
+GET {{baseUrl}}/odata/Calendar/export
